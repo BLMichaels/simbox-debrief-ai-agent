@@ -199,5 +199,7 @@ class PEARLSModel:
             return assistant_response
 
         except Exception as e:
+            if hasattr(e, 'response') and e.response is not None:
+                print("Perplexity API error response:", e.response.text)
             print(f"Error generating response: {str(e)}")
             return "I apologize, but I encountered an error processing your input. Please try again." 
