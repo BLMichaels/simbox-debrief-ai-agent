@@ -4,20 +4,23 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 from pearls_model import PEARLSModel
+import logging
 
 app = FastAPI()
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend domain
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 # Initialize PEARLS model
 pearls_model = PEARLSModel()
+
+logger = logging.getLogger(__name__)
 
 class DebriefRequest(BaseModel):
     text: str
@@ -35,7 +38,12 @@ async def debrief(request: DebriefRequest):
 
 @app.get("/")
 def read_root():
-    return {"status": "ok"}
+    logger.info("Health check endpoint called")
+    return {
+        "status": "ok",
+        "service": "SimBox Debrief AI Agent",
+        "version": "1.0.0"
+    }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True) 
