@@ -26,6 +26,7 @@ app.add_middleware(
 class DebriefRequest(BaseModel):
     text: str
     caseBookletLink: str = None
+    conversation_history: list = None
 
 class DebriefResponse(BaseModel):
     response: str
@@ -53,7 +54,11 @@ def health_check():
 async def debrief(request: DebriefRequest):
     try:
         logger.info(f"Received debrief request: {request.text[:100]}... Case booklet: {request.caseBookletLink}")
-        response = pearls_model.process_input(request.text, case_booklet_link=request.caseBookletLink)
+        response = pearls_model.process_input(
+            request.text,
+            conversation_history=request.conversation_history,
+            case_booklet_link=request.caseBookletLink
+        )
         logger.info("Successfully generated response")
         return {"response": response}
     except Exception as e:
