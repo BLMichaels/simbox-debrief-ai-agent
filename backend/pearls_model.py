@@ -179,7 +179,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "sonar-small-chat",  # Using a definitely supported model
+                "model": "sonar-small",  # Using the exact model name from Perplexity docs
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
