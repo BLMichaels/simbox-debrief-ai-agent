@@ -163,7 +163,7 @@ class PEARLSModel:
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "meta-llama/Llama-3-70b-chat-hf",
+            "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
             "messages": conversation,
             "temperature": 0.7,
             "max_tokens": 500
