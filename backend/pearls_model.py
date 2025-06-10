@@ -185,14 +185,16 @@ class PEARLSModel:
                 "max_tokens": 500
             }
 
-            logger.info(f"Sending request to Perplexity API with model: {payload['model']}")
-            logger.info(f"Request payload: {payload}")
+            logger.info("Sending request to Perplexity API:")
+            logger.info(f"URL: {PERPLEXITY_API_URL}")
+            logger.info(f"Headers: {headers}")
+            logger.info(f"Payload: {payload}")
             
             response = requests.post(PERPLEXITY_API_URL, headers=headers, json=payload)
             
             if not response.ok:
                 logger.error(f"Perplexity API error: Status {response.status_code}")
-                logger.error(f"Response headers: {response.headers}")
+                logger.error(f"Response headers: {dict(response.headers)}")
                 logger.error(f"Response body: {response.text}")
                 response.raise_for_status()
             
