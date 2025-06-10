@@ -179,7 +179,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "sonarmediumchat",  # Updated to currently supported model (2024-03-19)
+                "model": "sonar-small-chat",  # Using a definitely supported model
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
