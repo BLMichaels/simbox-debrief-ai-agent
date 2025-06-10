@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-from pearls_model import PEARLSModel, PERPLEXITY_API_KEY
+from pearls_model import PEARLSModel
 import os
 
 # Configure logging
