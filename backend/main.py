@@ -10,11 +10,6 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Validate environment variables
-if not PERPLEXITY_API_KEY:
-    logger.error("PERPLEXITY_API_KEY environment variable is not set!")
-    raise ValueError("PERPLEXITY_API_KEY environment variable is not set")
-
 logger.info("Environment variables loaded successfully")
 
 app = FastAPI()
