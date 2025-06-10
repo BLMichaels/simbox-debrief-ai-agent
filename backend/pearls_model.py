@@ -179,7 +179,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "llama-2-70b",  # Using the most basic model from Perplexity
+                "model": "pplx-7b-chat",  # Using a basic, officially supported model
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
