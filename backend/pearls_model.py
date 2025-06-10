@@ -179,12 +179,13 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "sonar-medium-chat",  # Updated to currently supported model (2024-03-19)
+                "model": "sonarmediumchat",  # Updated to currently supported model (2024-03-19)
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
             }
 
+            # Log the request details
             logger.info("Sending request to Perplexity API:")
             logger.info(f"URL: {PERPLEXITY_API_URL}")
             logger.info(f"Headers: {headers}")
