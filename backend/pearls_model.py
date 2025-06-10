@@ -164,7 +164,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "sonar-medium-chat",  # Updated to currently supported model
+                "model": "sonar-medium-chat",  # Updated to currently supported model (2024-03-19)
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
