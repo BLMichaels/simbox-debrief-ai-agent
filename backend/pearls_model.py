@@ -3,6 +3,7 @@ from typing import Dict, List
 import requests
 import os
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
@@ -10,6 +11,10 @@ load_dotenv()
 # Configure Perplexity
 PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions"
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class PEARLSPhase(Enum):
     PREPARATION = "P"
@@ -100,6 +105,7 @@ class PEARLSModel:
     def __init__(self):
         self.current_phase = PEARLSPhase.PREPARATION
         self.messages = []
+        logger.info("PEARLSModel initialized")
 
     @staticmethod
     def get_phase_prompt(phase: PEARLSPhase) -> str:
@@ -137,6 +143,8 @@ class PEARLSModel:
         """
         Process user input and generate an appropriate response using Perplexity's API.
         """
+        logger.info(f"Processing input in {self.current_phase.name} phase")
+        
         # Add user message to conversation history
         self.messages.append({
             "role": "user",
@@ -170,11 +178,21 @@ class PEARLSModel:
                 "max_tokens": 500
             }
 
+            logger.info(f"Sending request to Perplexity API with model: {payload['model']}")
+            logger.info(f"Request payload: {payload}")
+            
             response = requests.post(PERPLEXITY_API_URL, headers=headers, json=payload)
-            response.raise_for_status()  # Raise an exception for bad status codes
+            
+            if not response.ok:
+                logger.error(f"Perplexity API error: Status {response.status_code}")
+                logger.error(f"Response headers: {response.headers}")
+                logger.error(f"Response body: {response.text}")
+                response.raise_for_status()
             
             # Extract the response text
             response_data = response.json()
+            logger.info(f"Received response from Perplexity API: {response_data}")
+            
             if "choices" in response_data and len(response_data["choices"]) > 0:
                 assistant_response = response_data["choices"][0]["message"]["content"]
             else:
@@ -199,7 +217,7 @@ class PEARLSModel:
             return assistant_response
 
         except Exception as e:
+            logger.error(f"Error in process_input: {str(e)}")
             if hasattr(e, 'response') and e.response is not None:
-                print("Perplexity API error response:", e.response.text)
-            print(f"Error generating response: {str(e)}")
-            return "I apologize, but I encountered an error processing your input. Please try again." 
+                logger.error(f"Perplexity API error response: {e.response.text}")
+            raise 
