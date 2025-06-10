@@ -164,7 +164,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "sonar-medium-online",  # Using Perplexity's latest model
+                "model": "sonar-medium-chat",  # Updated to currently supported model
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
