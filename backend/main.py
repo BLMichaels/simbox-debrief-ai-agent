@@ -37,15 +37,15 @@ except Exception as e:
     logger.error(f"Failed to initialize PEARLS model: {e}")
     pearls_model = None
 
-# Update environment variable validation and health check for OpenAI
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Update environment variable validation and health check for TOGETHERAI
+TOGETHERAI_API_KEY = os.getenv("TOGETHERAI_API_KEY")
 
 @app.get("/")
 def health_check():
     return {
         "status": "ok",
         "version": "1.0.0",
-        "api_key_configured": bool(OPENAI_API_KEY)
+        "api_key_configured": bool(TOGETHERAI_API_KEY)
     }
 
 @app.post("/debrief")

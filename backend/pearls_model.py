@@ -8,17 +8,17 @@ import logging
 # Load environment variables
 load_dotenv()
 
-# Configure OpenAI
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Configure Together AI
+TOGETHERAI_API_KEY = os.getenv("TOGETHERAI_API_KEY")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Validate environment variables
-if not OPENAI_API_KEY:
-    logger.error("OPENAI_API_KEY environment variable is not set!")
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
+if not TOGETHERAI_API_KEY:
+    logger.error("TOGETHERAI_API_KEY environment variable is not set!")
+    raise ValueError("TOGETHERAI_API_KEY environment variable is not set")
 
 logger.info("Environment variables loaded successfully")
 
@@ -109,10 +109,10 @@ class PEARLSModel:
     }
 
     def __init__(self):
-        if not OPENAI_API_KEY:
-            logger.error("OPENAI_API_KEY is not set!")
-            raise ValueError("OPENAI_API_KEY is not set!")
-        logger.info("PEARLSModel initialized with OpenAI API.")
+        if not TOGETHERAI_API_KEY:
+            logger.error("TOGETHERAI_API_KEY is not set!")
+            raise ValueError("TOGETHERAI_API_KEY is not set!")
+        logger.info("PEARLSModel initialized with Together AI API.")
         self.current_phase = PEARLSPhase.PREPARATION
         self.messages = []
 
@@ -157,30 +157,30 @@ class PEARLSModel:
         ]
         if conversation_history:
             conversation = conversation_history + conversation
-        url = "https://api.openai.com/v1/chat/completions"
+        url = "https://api.together.xyz/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Authorization": f"Bearer {TOGETHERAI_API_KEY}",
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "gpt-3.5-turbo",
+            "model": "togethercomputer/llama-3-70b-8192",
             "messages": conversation,
             "temperature": 0.7,
             "max_tokens": 500
         }
-        logger.info(f"Sending request to OpenAI API:")
+        logger.info(f"Sending request to Together AI API:")
         logger.info(f"URL: {url}")
         logger.info(f"Headers: {headers}")
         logger.info(f"Payload: {payload}")
         try:
             response = requests.post(url, headers=headers, json=payload)
             if response.status_code != 200:
-                logger.error(f"OpenAI API error: Status {response.status_code}")
+                logger.error(f"Together AI API error: Status {response.status_code}")
                 logger.error(f"Response headers: {dict(response.headers)}")
                 logger.error(f"Response body: {response.text}")
                 response.raise_for_status()
             data = response.json()
-            logger.info(f"OpenAI API response: {data}")
+            logger.info(f"Together AI API response: {data}")
             assistant_response = data["choices"][0]["message"]["content"]
 
             # Check if we should transition to the next phase
