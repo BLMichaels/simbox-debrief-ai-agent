@@ -179,7 +179,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "llama-2-70b-chat",  # Most universally supported model
+                "model": "mistral-7b-instruct",  # Try a non-chat instruct model
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
