@@ -148,9 +148,11 @@ class PEARLSModel:
 
         return len(phase_messages) >= min_exchanges[current_phase]
 
-    def process_input(self, user_input: str, phase: str = "PREPARATION", conversation_history: List[Dict] = None) -> str:
+    def process_input(self, user_input: str, phase: str = "PREPARATION", conversation_history: List[Dict] = None, case_booklet_link: str = None) -> str:
         logger.info(f"Processing input in {phase} phase")
         system_message = self._get_system_message(phase)
+        if case_booklet_link:
+            system_message = f"Case Booklet Link: {case_booklet_link}\n" + system_message
         conversation = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_input}
