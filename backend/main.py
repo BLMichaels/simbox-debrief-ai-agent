@@ -39,17 +39,18 @@ try:
     pearls_model = PEARLSModel()
     logger.info("PEARLS model initialized successfully")
 except Exception as e:
-    logger.error(f"Failed to initialize PEARLS model: {str(e)}")
-    raise
+    logger.error(f"Failed to initialize PEARLS model: {e}")
+    pearls_model = None
+
+# Update environment variable validation and health check for OpenAI
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 @app.get("/")
-def read_root():
-    logger.info("Health check endpoint called")
+def health_check():
     return {
         "status": "ok",
-        "service": "SimBox Debrief AI Agent",
         "version": "1.0.0",
-        "api_key_configured": bool(PERPLEXITY_API_KEY)
+        "api_key_configured": bool(OPENAI_API_KEY)
     }
 
 @app.post("/debrief")

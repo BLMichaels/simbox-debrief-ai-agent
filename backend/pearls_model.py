@@ -8,18 +8,17 @@ import logging
 # Load environment variables
 load_dotenv()
 
-# Configure Perplexity
-PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
-PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions"
+# Configure OpenAI
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Validate environment variables
-if not PERPLEXITY_API_KEY:
-    logger.error("PERPLEXITY_API_KEY environment variable is not set!")
-    raise ValueError("PERPLEXITY_API_KEY environment variable is not set")
+if not OPENAI_API_KEY:
+    logger.error("OPENAI_API_KEY environment variable is not set!")
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
 
 logger.info("Environment variables loaded successfully")
 
@@ -110,9 +109,12 @@ class PEARLSModel:
     }
 
     def __init__(self):
+        if not OPENAI_API_KEY:
+            logger.error("OPENAI_API_KEY is not set!")
+            raise ValueError("OPENAI_API_KEY is not set!")
+        logger.info("PEARLSModel initialized with OpenAI API.")
         self.current_phase = PEARLSPhase.PREPARATION
         self.messages = []
-        logger.info("PEARLSModel initialized")
 
     @staticmethod
     def get_phase_prompt(phase: PEARLSPhase) -> str:
@@ -146,74 +148,40 @@ class PEARLSModel:
 
         return len(phase_messages) >= min_exchanges[current_phase]
 
-    def process_input(self, user_input: str) -> str:
-        """
-        Process user input and generate an appropriate response using Perplexity's API.
-        """
-        logger.info(f"Processing input in {self.current_phase.name} phase")
-        
-        # Add user message to conversation history
-        self.messages.append({
-            "role": "user",
-            "content": user_input,
-            "phase": self.current_phase.value
-        })
-
-        # Prepare the system message with phase-specific instructions
-        system_message = {
-            "role": "system",
-            "content": self.get_phase_prompt(self.current_phase)
-        }
-
-        # Prepare the conversation history for the API
-        conversation = [system_message] + [
-            {"role": msg["role"], "content": msg["content"]}
-            for msg in self.messages[-5:]  # Only use last 5 messages for context
+    def process_input(self, user_input: str, phase: str = "PREPARATION", conversation_history: List[Dict] = None) -> str:
+        logger.info(f"Processing input in {phase} phase")
+        system_message = self._get_system_message(phase)
+        conversation = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_input}
         ]
-
+        if conversation_history:
+            conversation = conversation_history + conversation
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": conversation,
+            "temperature": 0.7,
+            "max_tokens": 500
+        }
+        logger.info(f"Sending request to OpenAI API:")
+        logger.info(f"URL: {url}")
+        logger.info(f"Headers: {headers}")
+        logger.info(f"Payload: {payload}")
         try:
-            # Generate response using Perplexity
-            headers = {
-                "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "model": "mistral-7b-instruct",  # Try a non-chat instruct model
-                "messages": conversation,
-                "temperature": 0.7,
-                "max_tokens": 500
-            }
-
-            # Log the request details
-            logger.info("Sending request to Perplexity API:")
-            logger.info(f"URL: {PERPLEXITY_API_URL}")
-            logger.info(f"Headers: {headers}")
-            logger.info(f"Payload: {payload}")
-            
-            response = requests.post(PERPLEXITY_API_URL, headers=headers, json=payload)
-            
-            if not response.ok:
-                logger.error(f"Perplexity API error: Status {response.status_code}")
+            response = requests.post(url, headers=headers, json=payload)
+            if response.status_code != 200:
+                logger.error(f"OpenAI API error: Status {response.status_code}")
                 logger.error(f"Response headers: {dict(response.headers)}")
                 logger.error(f"Response body: {response.text}")
                 response.raise_for_status()
-            
-            # Extract the response text
-            response_data = response.json()
-            logger.info(f"Received response from Perplexity API: {response_data}")
-            
-            if "choices" in response_data and len(response_data["choices"]) > 0:
-                assistant_response = response_data["choices"][0]["message"]["content"]
-            else:
-                raise Exception("Invalid response format from Perplexity API")
-
-            # Add assistant response to conversation history
-            self.messages.append({
-                "role": "assistant",
-                "content": assistant_response,
-                "phase": self.current_phase.value
-            })
+            data = response.json()
+            logger.info(f"OpenAI API response: {data}")
+            assistant_response = data["choices"][0]["message"]["content"]
 
             # Check if we should transition to the next phase
             if self.should_transition_phase(self.messages, self.current_phase):
@@ -227,7 +195,25 @@ class PEARLSModel:
             return assistant_response
 
         except Exception as e:
-            logger.error(f"Error in process_input: {str(e)}")
-            if hasattr(e, 'response') and e.response is not None:
-                logger.error(f"Perplexity API error response: {e.response.text}")
-            raise 
+            logger.error(f"Error in process_input: {e}")
+            raise
+
+    def _get_system_message(self, phase: str) -> str:
+        if phase == "PREPARATION":
+            return (
+                "\n        You are in the Preparation phase of the PEARLS debriefing model.\n"
+                "        Focus on:\n"
+                "        1. Setting the stage for learning\n"
+                "        2. Establishing psychological safety\n"
+                "        3. Clarifying learning objectives\n"
+                "        4. Reviewing the simulation scenario\n"
+                "        \n        Ask questions that help the learner prepare for the debriefing process.\n        "
+            )
+        # Add other phases as needed
+        return "You are a helpful assistant."
+
+    def get_current_phase(self) -> PEARLSPhase:
+        return self.current_phase
+
+    def get_conversation_history(self) -> List[Dict]:
+        return self.messages 
