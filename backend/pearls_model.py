@@ -153,12 +153,10 @@ class PEARLSModel:
         system_message = self._get_system_message(phase)
         if case_booklet_link:
             system_message = f"Case Booklet Link: {case_booklet_link}\n" + system_message
-        conversation = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_input}
-        ]
-        if conversation_history:
-            conversation = conversation_history + conversation
+        conversation = []
+        if conversation_history and isinstance(conversation_history, list):
+            conversation = conversation_history.copy()
+        conversation.insert(0, {"role": "system", "content": system_message})
         url = "https://api.together.xyz/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {TOGETHERAI_API_KEY}",
