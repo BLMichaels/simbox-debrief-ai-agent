@@ -179,7 +179,7 @@ class PEARLSModel:
             }
             
             payload = {
-                "model": "pplx-7b-chat",  # Using a basic, officially supported model
+                "model": "llama-3-sonar-small-32k-chat",  # Using the latest supported model
                 "messages": conversation,
                 "temperature": 0.7,
                 "max_tokens": 500
